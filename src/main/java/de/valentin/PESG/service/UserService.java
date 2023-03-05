@@ -14,10 +14,6 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-
     public Optional<User> findByMail(String email){
         return userRepository.findByEmail(email);
     }
@@ -31,14 +27,6 @@ public class UserService {
     public boolean exists(int id){
         Optional<User> user = userRepository.findById(id);
         return user.isPresent();
-    }
-
-    public boolean authenticate(String email, String password) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (!user.isPresent()) {
-            return false;
-        }
-        return user.get().getPassword().equals(password);
     }
 
     public void deleteUser(Integer id) {

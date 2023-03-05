@@ -16,10 +16,12 @@ public class LinkService {
     @Autowired
     private LinkRepository linkRepository;
 
-    public Link sendLink(String linkString) {
-        Link link = new Link();
-        link.setLink(linkString);
-        link.setTimestamp(LocalDateTime.now());
+    @Autowired
+    private UserService userService;
+
+    public Link sendLink(String linkString, String email) {
+        Link link = Link.builder()
+                        .link(linkString).user(userService.findByMail(email).get()).timestamp(LocalDateTime.now()).build();
         return linkRepository.save(link);
     }
 

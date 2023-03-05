@@ -1,5 +1,6 @@
 package de.valentin.PESG.config;
 
+import de.valentin.PESG.service.GeneralService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    private final GeneralService generalService;
+
     @Override
     protected void doFilterInternal( @NonNull HttpServletRequest request,
                                      @NonNull HttpServletResponse response,
@@ -31,19 +34,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
-        System.out.println("Authentifizierung überprüfen");
+
+        //Wenn kein JWT Token vorhanden, dann Filterchain weiterführen
         if(authHeader == null || !authHeader.startsWith("Bearer ")){
             System.out.println("Kein JWT Token gefunden");
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7);
-        System.out.println("JWT Token: " + jwt);
+        //JWT Token und userEmail us token extrahieren
+        jwt = generalService.getJwtFromRequest(request);
         userEmail = jwtService.extractUsername(jwt);
-        System.out.println("Useremail: " + userEmail);
+
+        //Wenn User gefunden, dann Token validieren
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            System.out.println("User gefunden");
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            //Wenn Token gültig, dann User in SecurityContext setzen
             if(jwtService.isTokenValid(jwt, userDetails)){
                 System.out.println("Token ist gültig");
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -57,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-        System.out.println("Filterchain weiterführen");
+
         filterChain.doFilter(request, response);
     }
 }
