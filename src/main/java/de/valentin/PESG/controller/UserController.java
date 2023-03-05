@@ -1,5 +1,6 @@
 package de.valentin.PESG.controller;
 
+import de.valentin.PESG.config.JwtService;
 import de.valentin.PESG.entity.User;
 import de.valentin.PESG.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
 
     @PostMapping("/create")
     public User createUser(@RequestBody User user) {
